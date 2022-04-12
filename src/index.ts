@@ -25,55 +25,24 @@ fs.createReadStream(filePath)
 
 async function main() {
 
-
-
-
     paymentIds.map(async e => {
 
-        let csvFile = fs.createWriteStream('accounts.csv');
+        try {
 
-        // const stream = format({ headers: true });
-        // stream.pipe(csvFile);
+            const paymentInfo = await utils.getPaymentInfo(e)
 
-        // stream.write({ "abc": "def", "qwe": "rty" })
+            if (paymentInfo.status == "Authorized") {
+                const capturedRes = await utils.capture(e)
+                console.log(`Captured By The Script successfully - ${e}`)
+            }
+            else {
+                throw `Status Not Authorized | ${paymentInfo.status} - ${e}`
+            }
+        }
 
-
-
-        const parse = csv.parse(
-            {
-                ignoreEmpty: true,
-                discardUnmappedColumns: true,
-                headers: ['beta', 'alpha', 'redundant', 'charlie'],
-            });
-
-        const transform = csv.format({ headers: true })
-            .transform((row) => (
-                {
-                    NewAlpha: row.alpha, // reordered
-                    NewBeta: row.beta,
-                    NewCharlie: row.charlie,
-                    // redundant is dropped
-                    // delta is not loaded by parse() above
-                }
-            ));
-
-
-        // try {
-
-        //     const paymentInfo = await utils.getPaymentInfo(e)
-
-        //     if (paymentInfo.status == "Authorized") {
-        //         const capturedRes = await utils.capture(e)
-        //         console.log(`Captured By The Script successfully - ${e}`)
-        //     }
-        //     else {
-        //         throw `Status Not Authorized | ${paymentInfo.status} - ${e}`
-        //     }
-        // }
-
-        // catch (err) {
-        //     console.log(err)
-        // }
+        catch (err) {
+            console.log(err)
+        }
 
     })
 }
