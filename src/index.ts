@@ -1,6 +1,7 @@
 import * as csv from 'fast-csv';
 import * as fs from 'fs';
 import { Utils } from './utils';
+import * as async from 'async';
 
 const isSandbox = true
 const secretKey = "sk_test_916bc342-2c2c-4837-9535-bd5314384a9c"
@@ -22,8 +23,8 @@ fs.createReadStream(filePath)
 
 async function main() {
 
-    const csvData = [
-        ['payid', 'sourceid', 'amount', 'currency', 'payment_type', 'reference', 'status', 'approved', 'risk', 'captured_actid'],
+    const csvData: any = [
+        ['payid', 'sourceid', 'amount', 'currency', 'payment_type', 'reference', 'status', 'approved', 'risk', 'captured_actid', 'isFailed'],
     ]
 
     await Promise.all(
@@ -38,15 +39,23 @@ async function main() {
 
                     csvData.push([e, paymentInfo.source.id, paymentInfo.amount, paymentInfo.currency, paymentInfo.payment_type, paymentInfo.reference, paymentInfo.status, paymentInfo.approved, paymentInfo.risk.flagged == null || paymentInfo.risk.flagged == false ? false : paymentInfo.risk.flagged, capturedRes.action_id])
 
+                    console.log(`Capture Success | ${e}`)
+
+
+
                 }
                 else {
-                    throw `Status Not Authorized | ${paymentInfo.status} - ${e}`
+                    csvData.push([e, paymentInfo.source.id, paymentInfo.amount, paymentInfo.currency, paymentInfo.payment_type, paymentInfo.reference, paymentInfo.status, paymentInfo.approved, paymentInfo.risk.flagged == null || paymentInfo.risk.flagged == false ? false : paymentInfo.risk.flagged, null, true])
+                    console.log(`Status Not Authorized | ${paymentInfo.status} - ${e}`)
                 }
             }
 
             catch (err) {
+                csvData.push([e, null, null, null, null, null, null, null, null, null, true])
                 console.log(err)
             }
+
+            await new Promise(f => setTimeout(f, 3000));
 
         })
     )
@@ -60,6 +69,5 @@ async function main() {
 
 
 ///     Test Mode
-// utils.createDummyPayment()
 
-// main()
+// utils.createDummyPayment()

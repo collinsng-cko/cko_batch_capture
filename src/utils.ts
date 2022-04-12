@@ -12,6 +12,7 @@ export class Utils {
             this.url = "https://api.checkout.com/"
         }
         this.secretKey = secretKey
+
     }
 
     async capture(paymentId: string) {
@@ -49,7 +50,7 @@ export class Utils {
             throw "Don't use Prod SK For Generate Dummy Payment!!!!!!"
         }
 
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 100; i++) {
 
             const data = {
                 "currency": "EUR",
