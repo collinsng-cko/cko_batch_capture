@@ -4,7 +4,7 @@ import { Utils } from './utils';
 
 const isSandbox = true
 const secretKey = "sk_test_916bc342-2c2c-4837-9535-bd5314384a9c"
-const filePath = "testData.csv"
+const filePath = "testData.csv"     /// Pls put the csv under the project dir
 
 
 const utils = new Utils(isSandbox, secretKey)
