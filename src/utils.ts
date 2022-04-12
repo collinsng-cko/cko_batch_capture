@@ -73,7 +73,7 @@ export class Utils {
 
             const res = await axios.post(paymentPath, data, { headers: headers })
 
-            console.log(`"${res.data.id}",`)
+            console.log(res.data.id)
 
 
         }

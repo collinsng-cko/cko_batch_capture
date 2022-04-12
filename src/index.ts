@@ -1,12 +1,10 @@
 import * as csv from 'fast-csv';
 import * as fs from 'fs';
 import { Utils } from './utils';
-import '@fast-csv/format';
-import { format } from '@fast-csv/format';
 
 const isSandbox = true
 const secretKey = "sk_test_916bc342-2c2c-4837-9535-bd5314384a9c"
-const filePath = "/Users/collins.ng/Desktop/capture/src/A.csv"
+const filePath = "testData.csv"
 
 
 const utils = new Utils(isSandbox, secretKey)
@@ -21,30 +19,47 @@ fs.createReadStream(filePath)
         main()
     });
 
-// utils.createDummyPayment()
 
 async function main() {
 
-    paymentIds.map(async e => {
+    const csvData = [
+        ['payid', 'sourceid', 'amount', 'currency', 'payment_type', 'reference', 'status', 'approved', 'risk', 'captured_actid'],
+    ]
 
-        try {
+    await Promise.all(
+        paymentIds.map(async e => {
 
-            const paymentInfo = await utils.getPaymentInfo(e)
+            try {
 
-            if (paymentInfo.status == "Authorized") {
-                const capturedRes = await utils.capture(e)
-                console.log(`Captured By The Script successfully - ${e}`)
+                const paymentInfo = await utils.getPaymentInfo(e)
+
+                if (paymentInfo.status == "Authorized") {
+                    const capturedRes = await utils.capture(e)
+
+                    csvData.push([e, paymentInfo.source.id, paymentInfo.amount, paymentInfo.currency, paymentInfo.payment_type, paymentInfo.reference, paymentInfo.status, paymentInfo.approved, paymentInfo.risk.flagged == null || paymentInfo.risk.flagged == false ? false : paymentInfo.risk.flagged, capturedRes.action_id])
+
+                }
+                else {
+                    throw `Status Not Authorized | ${paymentInfo.status} - ${e}`
+                }
             }
-            else {
-                throw `Status Not Authorized | ${paymentInfo.status} - ${e}`
+
+            catch (err) {
+                console.log(err)
             }
-        }
 
-        catch (err) {
-            console.log(err)
-        }
+        })
+    )
 
-    })
+    const ws = fs.createWriteStream("output.csv")
+
+    csv.write(csvData, { headers: true }).pipe(ws)
 }
 
 
+
+
+///     Test Mode
+// utils.createDummyPayment()
+
+// main()
